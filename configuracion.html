@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>EduFacility Pro - Configuración de Espacios</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+    </style>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error": "#ba1a1a",
+                        "primary-container": "#1e3a8a",
+                        "on-surface-variant": "#444651",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#213145",
+                        "inverse-on-surface": "#eaf1ff",
+                        "primary-fixed": "#dce1ff",
+                        "on-error-container": "#93000a",
+                        "on-background": "#0b1c30",
+                        "secondary": "#0058be",
+                        "secondary-container": "#2170e4",
+                        "surface-variant": "#d3e4fe",
+                        "outline": "#757682",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#dce9ff",
+                        "on-error": "#ffffff",
+                        "outline-variant": "#c5c5d3",
+                        "tertiary-container": "#004a31",
+                        "surface-dim": "#cbdbf5",
+                        "on-primary-container": "#90a8ff",
+                        "primary": "#00236f",
+                        "surface-container": "#e5eeff",
+                        "surface-tint": "#4059aa",
+                        "on-tertiary": "#ffffff",
+                        "surface-bright": "#f8f9ff",
+                        "background": "#f8f9ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "tertiary": "#00311f",
+                        "inverse-primary": "#b6c4ff",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-container": "#27c38a",
+                        "surface-container-low": "#eff4ff",
+                        "surface": "#f8f9ff",
+                        "on-surface": "#0b1c30"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "xl": "32px",
+                        "sm": "8px",
+                        "base": "4px"
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface">
+
+    <aside class="h-screen w-64 fixed left-0 top-0 overflow-y-auto bg-surface-container border-r border-outline-variant flex flex-col py-lg px-md gap-sm z-50">
+        <div class="mb-xl px-xs">
+            <h1 class="font-headline-sm text-headline-sm font-bold text-on-surface">Main Campus</h1>
+            <p class="font-label-md text-label-md text-on-surface-variant">Central High</p>
+        </div>
+        <nav class="flex-1 flex flex-col gap-xs">
+            <a class="flex items-center gap-md px-md py-sm rounded transition-all duration-200 text-on-surface-variant hover:bg-surface-variant" href="#">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="font-label-md text-label-md">Dashboard</span>
+            </a>
+            <a class="flex items-center gap-md px-md py-sm rounded transition-all duration-200 text-on-surface-variant hover:bg-surface-variant" href="index.html">
+                <span class="material-symbols-outlined">calendar_month</span>
+                <span class="font-label-md text-label-md">Calendario</span>
+            </a>
+            <a class="flex items-center gap-md px-md py-sm rounded transition-all duration-200 text-on-surface-variant hover:bg-surface-variant" href="detalles.html">
+                <span class="material-symbols-outlined">map</span>
+                <span class="font-label-md text-label-md">Vista de Mapa</span>
+            </a>
+            <a class="flex items-center gap-md px-md py-sm rounded transition-all duration-200 text-on-surface-variant hover:bg-surface-variant" href="#">
+                <span class="material-symbols-outlined">assessment</span>
+                <span class="font-label-md text-label-md">Reportes</span>
+            </a>
+            <a class="flex items-center gap-md px-md py-sm rounded transition-all duration-200 text-secondary font-bold bg-secondary-container/20" href="configuracion.html">
+                <span class="material-symbols-outlined">settings</span>
+                <span class="font-label-md text-label-md">Configuración</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="ml-64 flex flex-col min-h-screen">
+        <header class="w-full h-16 sticky top-0 bg-surface-container-highest flex justify-between items-center px-gutter z-40 border-b border-outline-variant">
+            <div class="flex items-center gap-xl">
+                <span class="font-headline-md text-headline-md font-bold text-primary">EduFacility Pro</span>
+                <span class="text-body-sm font-semibold text-on-surface-variant">Panel de Configuración Dinámico</span>
+            </div>
+        </header>
+
+        <div class="flex-1 p-gutter grid grid-cols-1 xl:grid-cols-3 gap-lg overflow-y-auto">
+            
+            <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-sm flex flex-col h-fit gap-md">
+                <div>
+                    <h3 class="font-headline-sm text-headline-sm font-bold text-primary flex items-center gap-sm">
+                        <span class="material-symbols-outlined text-secondary">layers</span> Tipos de Espacios
+                    </h3>
+                    <p class="text-body-sm text-on-surface-variant">Clasificaciones estructurales del campus.</p>
+                </div>
+                <hr class="border-outline-variant"/>
+                
+                <form class="flex gap-xs" onsubmit="addType(event)">
+                    <input id="input-type-name" type="text" placeholder="Ej. Aula Magna" class="flex-1 bg-surface border border-outline-variant rounded-lg p-sm text-body-sm focus:ring-secondary focus:border-secondary" required/>
+                    <button type="submit" class="px-md bg-secondary text-on-secondary font-bold text-body-sm rounded-lg hover:bg-secondary-container">+</button>
+                </form>
+
+                <div class="space-y-xs mt-xs" id="types-list"></div>
+            </section>
+
+            <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-sm flex flex-col h-fit gap-md">
+                <div>
+                    <h3 class="font-headline-sm text-headline-sm font-bold text-primary flex items-center gap-sm">
+                        <span class="material-symbols-outlined text-secondary">meeting_room</span> Registro de Inmuebles
+                    </h3>
+                    <p class="text-body-sm text-on-surface-variant">Asigna nuevas aulas físicas a una categoría.</p>
+                </div>
+                <hr class="border-outline-variant"/>
+
+                <form class="space-y-sm" onsubmit="addRoom(event)">
+                    <div>
+                        <label class="block text-[11px] font-bold text-on-surface-variant uppercase mb-xs">Identificador / Nombre</label>
+                        <input id="input-room-name" type="text" placeholder="Ej. Salón A-101" class="w-full bg-surface border border-outline-variant rounded-lg p-sm text-body-sm focus:ring-secondary focus:border-secondary" required/>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-on-surface-variant uppercase mb-xs">Edificio</label>
+                        <select id="select-room-building" class="w-full bg-surface border border-outline-variant rounded-lg p-sm text-body-sm focus:ring-secondary" required>
+                            <option value="Edificio A">Edificio A - Torre A</option>
+                            <option value="Edificio B">Edificio B - Torre B</option>
+                            <option value="Pabellón C">Auditorio y Cineteca</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-on-surface-variant uppercase mb-xs">Tipo de Espacio</label>
+                        <select id="select-room-type" class="w-full bg-surface border border-outline-variant rounded-lg p-sm text-body-sm focus:ring-secondary" required></select>
+                    </div>
+                    <button type="submit" class="w-full py-sm bg-secondary text-on-secondary rounded-lg font-bold text-body-sm hover:bg-secondary-container">
+                        Dar de Alta Inmueble
+                    </button>
+                </form>
+
+                <div class="space-y-xs mt-xs" id="rooms-list"></div>
+            </section>
+
+            <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-sm flex flex-col h-fit gap-md">
+                <div>
+                    <h3 class="font-headline-sm text-headline-sm font-bold text-primary flex items-center gap-sm">
+                        <span class="material-symbols-outlined text-secondary">lock_clock</span> Horarios Permanentes
+                    </h3>
+                    <p class="text-body-sm text-on-surface-variant">Bloquea franjas horarias fijas recurrentes.</p>
+                </div>
+                <hr class="border-outline-variant"/>
+
+                <form class="space-y-sm" onsubmit="addPermanentSchedule(event)">
+                    <div>
+                        <label class="block text-[11px] font-bold text-on-surface-variant uppercase mb-xs">Seleccionar Espacio</label>
+                        <select id="select-sched-room" class="w-full bg-surface border border-outline-variant rounded-lg p-sm text-body-sm focus:ring-secondary" required></select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-xs">
+                        <div>
+                            <label class="block text-[11px] font-bold text-on-surface-variant uppercase mb-xs">Día Recurrente</label>
+                            <select id="select-sched-day" class="w-full bg-surface border border-outline-variant rounded-lg p-sm text-body-sm focus:ring-secondary" required>
+                                <option>Lunes</option>
+                                <option>Martes</option>
+                                <option>Miércoles</option>
+                                <option>Jueves</option>
+                                <option>Viernes</option>
+                                <option>Sabado</option>
+                                <option>Domingo</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-on-surface-variant uppercase mb-xs">Bloque Horario</label>
+                            <select id="select-sched-time" class="w-full bg-surface border border-outline-variant rounded-lg p-sm text-body-sm focus:ring-secondary" required>
+                                <option>09:00 - 11:00</option>
+                                <option>10:00 - 12:00</option>
+                                <option>11:00 - 13:00</option>
+                                <option>12:00 - 14:00</option>
+                                <option>13:00 - 15:00</option>
+                                <option>14:00 - 16:00</option>
+                                <option>15:00 - 17:00</option>
+                                <option>16:00 - 18:00</option>
+                                <option>17:00 - 19:00</option>
+                                <option>18:00 - 20:00</option>
+                                <option>19:00 - 21:00</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-on-surface-variant uppercase mb-xs">Asignatura o Bloqueo Fijo</label>
+                        <input id="input-sched-title" type="text" placeholder="Ej. Química Orgánica I" class="w-full bg-surface border border-outline-variant rounded-lg p-sm text-body-sm focus:ring-secondary focus:border-secondary" required/>
+                    </div>
+                    <button type="submit" class="w-full py-sm bg-primary text-on-primary rounded-lg font-bold text-body-sm shadow-sm hover:opacity-90">
+                        Bloquear Horario Recurrente
+                    </button>
+                </form>
+
+                <div class="space-y-xs mt-xs" id="schedules-list"></div>
+            </section>
+
+        </div>
+    </main>
+
+    <script>
+        // --- DATOS POR DEFECTO ---
+        const defaultTypes = ["Aula Magna", "Laboratorio de Ciencias", "Auditorio Principal", "Taller Creativo"];
+        const defaultRooms = [
+            { id: 1, name: "Anfiteatro A-101", building: "Edificio A", type: "Aula Magna" },
+            { id: 2, name: "Laboratorio de Cómputo A-202", building: "Edificio A", type: "Laboratorio de Ciencias" }
+        ];
+        const defaultSchedules = [
+            { id: 1, room: "Anfiteatro A-101", day: "Lunes", time: "08:00 - 10:00", title: "Química Semestral" }
+        ];
+
+        // --- INICIALIZACIÓN ---
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!localStorage.getItem('facility_types')) localStorage.setItem('facility_types', JSON.stringify(defaultTypes));
+            if (!localStorage.getItem('facility_rooms')) localStorage.setItem('facility_rooms', JSON.stringify(defaultRooms));
+            if (!localStorage.getItem('facility_schedules')) localStorage.setItem('facility_schedules', JSON.stringify(defaultSchedules));
+            
+            renderAll();
+        });
+
+        // --- RENDERIZADORES DE INTERFAZ ---
+        function renderAll() {
+            renderTypes();
+            renderRooms();
+            renderSchedules();
+            updateDropdowns();
+        }
+
+        function renderTypes() {
+            const types = JSON.parse(localStorage.getItem('facility_types'));
+            const container = document.getElementById('types-list');
+            container.innerHTML = '';
+            types.forEach((type, index) => {
+                container.innerHTML += `
+                    <div class="flex justify-between items-center p-sm bg-surface-container-low border border-outline-variant rounded-lg">
+                        <span class="text-body-sm font-medium">${type}</span>
+                        <button onclick="deleteType(${index})" class="text-error text-body-sm font-bold hover:underline">Eliminar</button>
+                    </div>`;
+            });
+        }
+
+        function renderRooms() {
+            const rooms = JSON.parse(localStorage.getItem('facility_rooms'));
+            const container = document.getElementById('rooms-list');
+            container.innerHTML = '';
+            rooms.forEach(room => {
+                container.innerHTML += `
+                    <div class="flex justify-between items-center p-sm bg-surface-container-low border border-outline-variant rounded-lg">
+                        <div>
+                            <p class="text-body-sm font-bold">${room.name}</p>
+                            <p class="text-[11px] text-on-surface-variant">${room.building} • ${room.type}</p>
+                        </div>
+                        <button onclick="deleteRoom(${room.id})" class="text-error text-body-sm font-bold hover:underline">Eliminar</button>
+                    </div>`;
+            });
+        }
+
+        function renderSchedules() {
+            const schedules = JSON.parse(localStorage.getItem('facility_schedules'));
+            const container = document.getElementById('schedules-list');
+            container.innerHTML = '';
+            schedules.forEach(sched => {
+                container.innerHTML += `
+                    <div class="flex justify-between items-center p-sm bg-surface-container-low border border-outline-variant rounded-lg">
+                        <div>
+                            <p class="text-body-sm font-bold text-primary">${sched.title}</p>
+                            <p class="text-[11px] text-on-surface-variant">${sched.room} • ${sched.day} (${sched.time})</p>
+                        </div>
+                        <button onclick="deleteSchedule(${sched.id})" class="text-error text-body-sm font-bold hover:underline">Eliminar</button>
+                    </div>`;
+            });
+        }
+
+        function updateDropdowns() {
+            const types = JSON.parse(localStorage.getItem('facility_types'));
+            const rooms = JSON.parse(localStorage.getItem('facility_rooms'));
+            
+            const typeSelect = document.getElementById('select-room-type');
+            typeSelect.innerHTML = types.map(t => `<option>${t}</option>`).join('');
+
+            const roomSelect = document.getElementById('select-sched-room');
+            roomSelect.innerHTML = rooms.map(r => `<option>${r.name}</option>`).join('');
+        }
+
+        // --- ACCIONES (ALTAS Y BAJAS) ---
+        function addType(e) {
+            e.preventDefault();
+            const input = document.getElementById('input-type-name');
+            let types = JSON.parse(localStorage.getItem('facility_types'));
+            types.push(input.value.trim());
+            localStorage.setItem('facility_types', JSON.stringify(types));
+            input.value = '';
+            renderAll();
+        }
+
+        function deleteType(index) {
+            let types = JSON.parse(localStorage.getItem('facility_types'));
+            types.splice(index, 1);
+            localStorage.setItem('facility_types', JSON.stringify(types));
+            renderAll();
+        }
+
+        function addRoom(e) {
+            e.preventDefault();
+            const name = document.getElementById('input-room-name').value.trim();
+            const building = document.getElementById('select-room-building').value;
+            const type = document.getElementById('select-room-type').value;
+
+            let rooms = JSON.parse(localStorage.getItem('facility_rooms'));
+            rooms.push({ id: Date.now(), name, building, type });
+            localStorage.setItem('facility_rooms', JSON.stringify(rooms));
+            
+            document.getElementById('input-room-name').value = '';
+            renderAll();
+        }
+
+        function deleteRoom(id) {
+            let rooms = JSON.parse(localStorage.getItem('facility_rooms'));
+            rooms = rooms.filter(r => r.id !== id);
+            localStorage.setItem('facility_rooms', JSON.stringify(rooms));
+            renderAll();
+        }
+
+        function addPermanentSchedule(e) {
+            e.preventDefault();
+            const room = document.getElementById('select-sched-room').value;
+            const day = document.getElementById('select-sched-day').value;
+            const time = document.getElementById('select-sched-time').value;
+            const title = document.getElementById('input-sched-title').value.trim();
+
+            let schedules = JSON.parse(localStorage.getItem('facility_schedules'));
+            schedules.push({ id: Date.now(), room, day, time, title });
+            localStorage.setItem('facility_schedules', JSON.stringify(schedules));
+
+            document.getElementById('input-sched-title').value = '';
+            renderAll();
+        }
+
+        function deleteSchedule(id) {
+            let schedules = JSON.parse(localStorage.getItem('facility_schedules'));
+            schedules = schedules.filter(s => s.id !== id);
+            localStorage.setItem('facility_schedules', JSON.stringify(schedules));
+            renderAll();
+        }
+    </script>
+</body>
+</html>
