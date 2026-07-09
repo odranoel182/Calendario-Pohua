@@ -84,7 +84,7 @@
                 <span class="text-primary font-bold">Fecha de Trabajo:</span>
                 <span id="active-date-badge" class="text-secondary font-bold bg-white px-2 py-0.5 rounded border">--/--/----</span>
                 <span class="text-primary font-bold ml-2">Día:</span>
-                <select id="day-selector" onchange="changeActiveDay(this.value)" class="bg-transparent border-none text-xs font-bold text-secondary focus:ring-0 py-0 cursor-pointer">
+                <select id="day-selector" class="bg-transparent border-none text-xs font-bold text-secondary focus:ring-0 py-0 cursor-pointer">
                     <option value="Lunes">Lunes</option>
                     <option value="Martes">Martes</option>
                     <option value="Miércoles">Miércoles</option>
@@ -124,7 +124,6 @@
         </aside>
 
         <main class="flex-1 flex p-6 gap-6 overflow-hidden">
-            
             <div class="flex-1 flex flex-col gap-4 overflow-y-auto pr-1 custom-scrollbar">
                 <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center shadow-sm gap-4">
                     <div>
@@ -136,11 +135,11 @@
                         </p>
                     </div>
                     <div class="flex flex-wrap gap-1 bg-surface-container rounded-lg p-1 border border-outline-variant h-fit" id="building-filters-group">
-                        </div>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 gap-4" id="free-blocks-container">
-                    </div>
+                </div>
             </div>
 
             <aside class="w-80 flex-shrink-0">
@@ -151,7 +150,7 @@
                     </div>
                     <hr class="border-outline-variant"/>
                     
-                    <form class="space-y-3" onsubmit="saveExpressBooking(event)">
+                    <form id="express-booking-form" class="space-y-3">
                         <div>
                             <label class="block text-[11px] font-bold text-on-surface-variant uppercase mb-1">Aula</label>
                             <input id="form-room" type="text" class="w-full bg-surface-container-low border border-outline-variant rounded-lg p-2 text-xs font-semibold text-primary" readonly required />
@@ -169,7 +168,7 @@
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-on-surface-variant uppercase mb-1">Duración del Evento</label>
-                            <select id="form-duration" onchange="calculateEndTime()" class="w-full bg-white border border-outline-variant rounded-lg p-2 text-xs text-on-surface focus:ring-secondary">
+                            <select id="form-duration" class="w-full bg-white border border-outline-variant rounded-lg p-2 text-xs text-on-surface focus:ring-secondary">
                                 <option value="1">1 Hora</option>
                                 <option value="2">2 Horas</option>
                                 <option value="3">3 Horas</option>
@@ -220,17 +219,42 @@
                 <p id="modal-error-msg" class="hidden text-[11px] text-error font-medium mt-1">Contraseña incorrecta.</p>
             </div>
             <div class="flex justify-end gap-2 pt-1">
-                <button onclick="closeOverrideModal()" class="px-3 py-1.5 border border-outline-variant rounded-lg text-xs font-medium hover:bg-slate-100">
+                <button id="btn-cancel-override" class="px-3 py-1.5 border border-outline-variant rounded-lg text-xs font-medium hover:bg-slate-100">
                     Cancelar
                 </button>
-                <button onclick="processOverrideAction()" class="px-3 py-1.5 bg-error text-white rounded-lg text-xs font-bold shadow-md hover:opacity-90">
+                <button id="btn-confirm-override" class="px-3 py-1.5 bg-error text-white rounded-lg text-xs font-bold shadow-md hover:opacity-90">
                     Desalojar Bloque
                 </button>
             </div>
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // ⚠️ PEGA AQUÍ TUS CREDENCIALES COPIADAS DE LA CONSOLA DE FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJLTxaDb6sNUw8jk4ruHnPEle0J6kfy5Y",
+            authDomain: "calendario-pohua.firebaseapp.com",
+            databaseURL: "https://calendario-pohua-default-rtdb.firebaseio.com",
+            projectId: "calendario-pohua",
+            storageBucket: "calendario-pohua.firebasestorage.app",
+            messagingSenderId: "83011562243",
+            appId: "1:83011562243:web:4e978318fb98f366241736"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Almacenamiento dinámico de datos sincronizados
+        let firebaseData = {
+            rooms: [],
+            schedules: [],
+            events: []
+        };
+
         const baseTimelineHours = [
             { label: "07:00", intVal: 7, display: "07:00 - 08:00" },
             { label: "08:00", intVal: 8, display: "08:00 - 09:00" },
@@ -239,7 +263,7 @@
             { label: "11:00", intVal: 11, display: "11:00 - 12:00" },
             { label: "12:00", intVal: 12, display: "12:00 - 13:00" },
             { label: "13:00", intVal: 13, display: "13:00 - 14:00" },
-            { label: "14:00", intVal: 14, display: "14:00 - 15:00" },
+            { label: "14:00", intVal: 14, rangeStr: "14:00 - 15:00", display: "14:00 - 15:00" }, // fix simple fallback display
             { label: "15:00", intVal: 15, display: "15:00 - 16:00" },
             { label: "16:00", intVal: 16, display: "16:00 - 17:00" },
             { label: "17:00", intVal: 17, display: "17:00 - 18:00" },
@@ -247,6 +271,9 @@
             { label: "19:00", intVal: 19, display: "19:00 - 20:00" },
             { label: "20:00", intVal: 20, display: "20:00 - 21:00" }
         ];
+
+        // Asegurarnos que todos tengan el display correcto
+        baseTimelineHours[7].display = "14:00 - 15:00";
 
         let selectedBuilding = "";
         let selectedDay = "Lunes";
@@ -256,14 +283,13 @@
         let targetOverrideType = ""; // 'fixed' o 'event'
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Cargar estado de día y fecha guardada en el Calendario Mensual
+            // Cargar estado inicial guardado transitoriamente
             if(localStorage.getItem('global_active_day')) {
                 selectedDay = localStorage.getItem('global_active_day');
             }
             if(localStorage.getItem('global_active_date_str')) {
                 selectedDateStr = localStorage.getItem('global_active_date_str');
             } else {
-                // Contingencia fecha de hoy
                 const today = new Date();
                 const padD = today.getDate() < 10 ? '0' + today.getDate() : today.getDate();
                 const padM = (today.getMonth()+1) < 10 ? '0' + (today.getMonth()+1) : (today.getMonth()+1);
@@ -273,16 +299,35 @@
 
             document.getElementById('day-selector').value = selectedDay;
             document.getElementById('active-date-badge').innerText = selectedDateStr;
+
+            // Escuchar cambios del select de días
+            document.getElementById('day-selector').onchange = (e) => changeActiveDay(e.target.value);
             
-            buildDynamicBuildingFilters();
+            // Listeners de formularios y modales
+            document.getElementById('express-booking-form').onsubmit = (e) => saveExpressBooking(e);
+            document.getElementById('form-duration').onchange = () => calculateEndTime();
+            document.getElementById('btn-cancel-override').onclick = () => closeOverrideModal();
+            document.getElementById('btn-confirm-override').onclick = () => processOverrideAction();
+
+            // Sincronización en tiempo real desde Firebase
+            const dbRef = ref(db, "/");
+            onValue(dbRef, (snapshot) => {
+                const data = snapshot.val() || {};
+                
+                firebaseData.rooms = data.facility_rooms ? Object.values(data.facility_rooms) : [];
+                firebaseData.schedules = data.facility_schedules ? Object.values(data.facility_schedules) : [];
+                firebaseData.events = data.facility_events ? Object.values(data.facility_events) : [];
+
+                // Re-renderizar filtros y el mapa completo
+                buildDynamicBuildingFilters();
+            });
         });
 
         function buildDynamicBuildingFilters() {
-            const rooms = JSON.parse(localStorage.getItem('facility_rooms')) || [];
             const filterGroup = document.getElementById('building-filters-group');
             filterGroup.innerHTML = '';
 
-            const uniqueBuildings = [...new Set(rooms.map(r => r.building))].filter(Boolean);
+            const uniqueBuildings = [...new Set(firebaseData.rooms.map(r => r.building))].filter(Boolean);
 
             if (uniqueBuildings.length === 0) {
                 filterGroup.innerHTML = '<span class="text-xs text-on-surface-variant px-2 py-1">Sin edificios</span>';
@@ -332,14 +377,10 @@
         }
 
         function renderFreeScheduleMap() {
-            const rooms = JSON.parse(localStorage.getItem('facility_rooms')) || [];
-            const schedules = JSON.parse(localStorage.getItem('facility_schedules')) || [];
-            const events = JSON.parse(localStorage.getItem('facility_events')) || [];
-            
             const container = document.getElementById('free-blocks-container');
             container.innerHTML = '';
             
-            const filteredRooms = rooms.filter(r => r.building === selectedBuilding);
+            const filteredRooms = firebaseData.rooms.filter(r => r.building === selectedBuilding);
 
             if (!selectedBuilding || filteredRooms.length === 0) {
                 container.innerHTML = `
@@ -351,10 +392,8 @@
             }
 
             filteredRooms.forEach(room => {
-                // 1. Clases Fijas Semestrales (Foco en el día de la semana)
-                const roomSchedules = schedules.filter(s => s.room === room.name && s.day === selectedDay);
-                // 2. Eventos Únicos (Foco en la fecha exacta de almacenamiento)
-                const roomEvents = events.filter(e => e.room === room.name && e.date === selectedDateStr);
+                const roomSchedules = firebaseData.schedules.filter(s => s.room === room.name && s.day === selectedDay);
+                const roomEvents = firebaseData.events.filter(e => e.room === room.name && e.date === selectedDateStr);
 
                 let occupancyMap = {}; 
                 
@@ -379,10 +418,13 @@
                     const status = occupancyMap[hourObj.intVal];
 
                     if (status) {
+                        // Inyectar referencias dinámicas a funciones del módulo asociándolas a eventos de ventana
+                        const clickHandlerName = `triggerOverride_${status.id}`;
+                        window[clickHandlerName] = () => triggerAdminOverride(room.name, hourObj.display, status.title, status.id, status.type);
+
                         if (status.type === 'fixed') {
-                            // BLOQUE ROJO: Clase fija
                             blocksHTML += `
-                                <button onclick="triggerAdminOverride('${room.name}', '${hourObj.display}', '${status.title}', ${status.id}, 'fixed')" class="p-2 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg hover:bg-rose-100 transition-all text-left flex flex-col justify-between min-h-[54px]">
+                                <button onclick="window['${clickHandlerName}']()" class="p-2 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg hover:bg-rose-100 transition-all text-left flex flex-col justify-between min-h-[54px]">
                                     <div class="w-full">
                                         <div class="text-[8px] font-bold uppercase text-rose-500 tracking-wider">FIJO SEMESTRAL</div>
                                         <span class="text-xs font-bold block">${hourObj.label}</span>
@@ -390,9 +432,8 @@
                                     </div>
                                 </button>`;
                         } else {
-                            // BLOQUE AZUL: Evento único
                             blocksHTML += `
-                                <button onclick="triggerAdminOverride('${room.name}', '${hourObj.display}', '${status.title}', ${status.id}, 'event')" class="p-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition-all text-left flex flex-col justify-between min-h-[54px]">
+                                <button onclick="window['${clickHandlerName}']()" class="p-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition-all text-left flex flex-col justify-between min-h-[54px]">
                                     <div class="w-full">
                                         <div class="text-[8px] font-bold uppercase text-blue-500 tracking-wider">CITA / EVENTO</div>
                                         <span class="text-xs font-bold block">${hourObj.label}</span>
@@ -402,8 +443,11 @@
                         }
                     } else {
                         totalFreeCounter++;
+                        const slotHandlerName = `selectSlot_${room.name.replace(/\s+/g, '_')}_${hourObj.intVal}`;
+                        window[slotHandlerName] = () => selectFreeSlot(room.name, hourObj.label, hourObj.intVal);
+
                         blocksHTML += `
-                            <button onclick="selectFreeSlot('${room.name}', '${hourObj.label}', ${hourObj.intVal})" class="p-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-all text-left flex flex-col justify-between min-h-[54px] group">
+                            <button onclick="window['${slotHandlerName}']()" class="p-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-all text-left flex flex-col justify-between min-h-[54px] group">
                                 <span class="text-[8px] text-emerald-600 font-bold uppercase tracking-wider">LIBRE</span>
                                 <span class="text-xs font-bold block">${hourObj.label}</span>
                             </button>`;
@@ -454,22 +498,17 @@
             document.getElementById('form-final-range').value = computedRange;
 
             let collisionDetected = false;
-            
-            const schedules = JSON.parse(localStorage.getItem('facility_schedules')) || [];
-            const events = JSON.parse(localStorage.getItem('facility_events')) || [];
-
             let hoursTarget = [];
             for(let h = startInt; h < finalEndInt; h++) { hoursTarget.push(h); }
 
-            // Analizar choques contra clases fijas
-            schedules.filter(s => s.room === roomName && s.day === selectedDay).forEach(occ => {
+            // Evaluar colisiones contra datos de Firebase
+            firebaseData.schedules.filter(s => s.room === roomName && s.day === selectedDay).forEach(occ => {
                 parseRangeHours(occ.time).forEach(oh => {
                     if(hoursTarget.includes(oh)) collisionDetected = true;
                 });
             });
 
-            // Analizar choques contra otros eventos únicos del mismo día
-            events.filter(e => e.room === roomName && e.date === selectedDateStr).forEach(evt => {
+            firebaseData.events.filter(e => e.room === roomName && e.date === selectedDateStr).forEach(evt => {
                 parseRangeHours(evt.time).forEach(oh => {
                     if(hoursTarget.includes(oh)) collisionDetected = true;
                 });
@@ -495,21 +534,25 @@
             const day = document.getElementById('form-day').value;
             const time = document.getElementById('form-final-range').value;
             const title = document.getElementById('form-title').value.trim();
+            const newId = Date.now();
 
-            // Guardar en base de datos independiente de eventos (Azules)
-            let events = JSON.parse(localStorage.getItem('facility_events')) || [];
-            events.push({ id: Date.now(), room, day, date: selectedDateStr, time, title });
-            localStorage.setItem('facility_events', JSON.stringify(events));
-
-            // Limpieza del formulario
-            document.getElementById('form-room').value = '';
-            document.getElementById('form-day').value = '';
-            document.getElementById('form-start-time').value = '';
-            document.getElementById('form-start-int').value = '';
-            document.getElementById('form-final-range').value = '';
-            document.getElementById('form-title').value = '';
-
-            renderFreeScheduleMap();
+            // Escribir el nuevo evento directo en Firebase Realtime Database
+            set(ref(db, `facility_events/${newId}`), {
+                id: newId,
+                room,
+                day,
+                date: selectedDateStr,
+                time,
+                title
+            }).then(() => {
+                // Resetear campos del formulario tras inserción exitosa
+                document.getElementById('form-room').value = '';
+                document.getElementById('form-day').value = '';
+                document.getElementById('form-start-time').value = '';
+                document.getElementById('form-start-int').value = '';
+                document.getElementById('form-final-range').value = '';
+                document.getElementById('form-title').value = '';
+            }).catch(err => console.error("Error al guardar en Firebase:", err));
         }
 
         function triggerAdminOverride(roomName, timeBlock, title, id, type) {
@@ -535,18 +578,15 @@
             const password = document.getElementById('admin-password-input').value;
             
             if (password === 'admin123') {
-                if (targetOverrideType === 'fixed') {
-                    let schedules = JSON.parse(localStorage.getItem('facility_schedules')) || [];
-                    schedules = schedules.filter(s => s.id !== targetOverrideId);
-                    localStorage.setItem('facility_schedules', JSON.stringify(schedules));
-                } else {
-                    let events = JSON.parse(localStorage.getItem('facility_events')) || [];
-                    events = events.filter(e => e.id !== targetOverrideId);
-                    localStorage.setItem('facility_events', JSON.stringify(events));
-                }
-
-                closeOverrideModal();
-                renderFreeScheduleMap();
+                // Determinar la rama correcta en Firebase segun el tipo
+                const nodePath = targetOverrideType === 'fixed' ? 'facility_schedules' : 'facility_events';
+                
+                // Remover el objeto por su ID de clave en Firebase
+                remove(ref(db, `${nodePath}/${targetOverrideId}`))
+                    .then(() => {
+                        closeOverrideModal();
+                    })
+                    .catch(err => console.error("Error al eliminar en Firebase:", err));
             } else {
                 document.getElementById('modal-error-msg').classList.remove('hidden');
             }

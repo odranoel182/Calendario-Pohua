@@ -76,11 +76,11 @@
                     <p class="text-xs text-on-surface-variant">Rojo: Clases fijas (4 meses) | Azul: Citas y eventos únicos del día.</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button onclick="navigateMonth(-1)" class="p-2 border border-outline-variant rounded-lg hover:bg-surface-container flex items-center">
+                    <button id="btn-prev" class="p-2 border border-outline-variant rounded-lg hover:bg-surface-container flex items-center">
                         <span class="material-symbols-outlined">chevron_left</span>
                     </button>
-                    <button onclick="setTodayMonth()" class="px-3 py-1.5 border border-outline-variant text-xs font-bold rounded-lg hover:bg-surface-container">Hoy</button>
-                    <button onclick="navigateMonth(1)" class="p-2 border border-outline-variant rounded-lg hover:bg-surface-container flex items-center">
+                    <button id="btn-today" class="px-3 py-1.5 border border-outline-variant text-xs font-bold rounded-lg hover:bg-surface-container">Hoy</button>
+                    <button id="btn-next" class="p-2 border border-outline-variant rounded-lg hover:bg-surface-container flex items-center">
                         <span class="material-symbols-outlined">chevron_right</span>
                     </button>
                 </div>
@@ -91,7 +91,7 @@
                     <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
                 </div>
                 <div class="grid grid-cols-7 flex-1 divide-x divide-y divide-outline-variant/50" id="month-days-matrix">
-                    </div>
+                </div>
             </div>
         </main>
     </div>
@@ -106,7 +106,7 @@
                         <p class="text-xs text-blue-200" id="modal-day-subtitle">Día</p>
                     </div>
                 </div>
-                <button onclick="closeQuickMap()" class="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10 flex items-center">
+                <button id="btn-close-modal" class="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10 flex items-center">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
@@ -119,19 +119,44 @@
                 </div>
 
                 <div class="space-y-2" id="modal-rooms-map-container">
-                    </div>
+                </div>
             </div>
 
             <div class="p-3 bg-surface-container border-t border-outline-variant flex justify-between items-center">
                 <p class="text-xs text-on-surface-variant">Los eventos azules se crean desde el panel de asignación express.</p>
-                <button onclick="redirectToAdvancedBooking()" class="px-4 py-2 bg-secondary text-white text-xs font-bold rounded-lg hover:bg-secondary-container flex items-center gap-1">
+                <button id="btn-advanced-booking" class="px-4 py-2 bg-secondary text-white text-xs font-bold rounded-lg hover:bg-secondary-container flex items-center gap-1">
                     <span class="material-symbols-outlined text-[16px]">add_box</span> Gestionar Ocupaciones en Mapa Completo
                 </button>
             </div>
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // ⚠️ PEGA AQUÍ TUS CREDENCIALES COPIADAS DE LA CONSOLA DE FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJLTxaDb6sNUw8jk4ruHnPEle0J6kfy5Y",
+            authDomain: "calendario-pohua.firebaseapp.com",
+            databaseURL: "https://calendario-pohua-default-rtdb.firebaseio.com",
+            projectId: "calendario-pohua",
+            storageBucket: "calendario-pohua.firebasestorage.app",
+            messagingSenderId: "83011562243",
+            appId: "1:83011562243:web:4e978318fb98f366241736"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Almacenamiento local temporal para sincronización en tiempo real
+        let firebaseData = {
+            schedules: [],
+            events: [],
+            rooms: []
+        };
+
         const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
         const dayNamesMap = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sabado"];
 
@@ -156,8 +181,28 @@
         let globalSelectedDateStr = "";
         let globalSelectedDayName = "Lunes";
 
+        // Escucha en tiempo real de Firebase
         document.addEventListener("DOMContentLoaded", () => {
-            renderMonthlyCalendar();
+            // Referencias a los nodos de la base de datos
+            const dbRef = ref(db, "/");
+            onValue(dbRef, (snapshot) => {
+                const data = snapshot.val() || {};
+                
+                // Convertimos los objetos indexados de Firebase en Arrays tradicionales
+                firebaseData.schedules = data.facility_schedules ? Object.values(data.facility_schedules) : [];
+                firebaseData.events = data.facility_events ? Object.values(data.facility_events) : [];
+                firebaseData.rooms = data.facility_rooms ? Object.values(data.facility_rooms) : [];
+
+                // Re-renderizar calendario automáticamente con datos actualizados en la nube
+                renderMonthlyCalendar();
+            });
+
+            // Configurar Listeners de botones de control
+            document.getElementById("btn-prev").onclick = () => navigateMonth(-1);
+            document.getElementById("btn-next").onclick = () => navigateMonth(1);
+            document.getElementById("btn-today").onclick = () => setTodayMonth();
+            document.getElementById("btn-close-modal").onclick = () => closeQuickMap();
+            document.getElementById("btn-advanced-booking").onclick = () => redirectToAdvancedBooking();
         });
 
         function setTodayMonth() {
@@ -181,10 +226,6 @@
             const firstDayIndex = new Date(year, month, 1).getDay();
             const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
 
-            // Bases independientes
-            const schedules = JSON.parse(localStorage.getItem('facility_schedules')) || [];
-            const events = JSON.parse(localStorage.getItem('facility_events')) || [];
-
             // Rellenar desfasamiento inicial
             for(let i = 0; i < firstDayIndex; i++) {
                 const emptyCell = document.createElement("div");
@@ -197,14 +238,13 @@
                 const iterDate = new Date(year, month, dayNum);
                 const dayOfWeekName = dayNamesMap[iterDate.getDay()];
                 
-                // Formato estricto para eventos de un solo día: DD/MM/AAAA
                 const padDay = dayNum < 10 ? '0' + dayNum : dayNum;
                 const padMonth = (month + 1) < 10 ? '0' + (month + 1) : (month + 1);
                 const dateKey = `${padDay}/${padMonth}/${year}`;
 
-                // Filtrar alertas volumétricas
-                const hasSchedules = schedules.some(s => s.day === dayOfWeekName);
-                const dayEvents = events.filter(e => e.date === dateKey);
+                // Filtrar usando nuestra caché dinámica de Firebase
+                const hasSchedules = firebaseData.schedules.some(s => s.day === dayOfWeekName);
+                const dayEvents = firebaseData.events.filter(e => e.date === dateKey);
 
                 const isRealToday = dayNum === realToday.getDate() && month === realToday.getMonth() && year === realToday.getFullYear();
 
@@ -256,24 +296,18 @@
             document.getElementById("modal-date-title").innerText = `Mapa del Día: ${dayNum} de ${monthNames[monthIndex]} de ${year}`;
             document.getElementById("modal-day-subtitle").innerText = `Fecha de evaluación: ${dateKey} (${dayOfWeekName})`;
 
-            const rooms = JSON.parse(localStorage.getItem('facility_rooms')) || [];
-            const schedules = JSON.parse(localStorage.getItem('facility_schedules')) || [];
-            const events = JSON.parse(localStorage.getItem('facility_events')) || [];
-            
             const container = document.getElementById("modal-rooms-map-container");
             container.innerHTML = '';
 
-            if(rooms.length === 0) {
+            if(firebaseData.rooms.length === 0) {
                 container.innerHTML = `<div class="p-4 bg-white border text-center text-xs text-on-surface-variant">Sin aulas configuradas.</div>`;
                 document.getElementById("quick-map-modal").classList.remove("hidden");
                 return;
             }
 
-            rooms.forEach(room => {
-                // 1. Filtrar clases fijas recurrentes del día de la semana
-                const fixedDaySchedules = schedules.filter(s => s.room === room.name && s.day === dayOfWeekName);
-                // 2. Filtrar eventos únicos de este día y fecha específica
-                const specificDayEvents = events.filter(e => e.room === room.name && e.date === dateKey);
+            firebaseData.rooms.forEach(room => {
+                const fixedDaySchedules = firebaseData.schedules.filter(s => s.room === room.name && s.day === dayOfWeekName);
+                const specificDayEvents = firebaseData.events.filter(e => e.room === room.name && e.date === dateKey);
 
                 let occupancyMap = {};
                 
